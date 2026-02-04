@@ -24,7 +24,7 @@ def apply_security_headers(response):
 
 @app.route('/')
 def hello():
-    return jsonify({"status": "Green", "security": "Hardened"})
+    return jsonify({"message": "WELCOME TO your E-HEALTH PLATFORM by Gracious", "status": "Green", "security": "Hardened"})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
