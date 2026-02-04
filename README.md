@@ -154,7 +154,7 @@ git branch -M main
 
 git commit -m "DevSecOps pipeline"
 
-git push origin main
+git push -u origin main
 
 Navigate to the Actions tab in your GitHub to watch the pipeline execute the SAST, SCA, and DAST scans.
 

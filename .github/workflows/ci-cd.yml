@@ -16,8 +16,23 @@ jobs:
           directory: .
           framework: terraform,dockerfile
           quiet: true
-          soft_fail: false # Hard fail if security best practices are missed
+          soft_fail: false 
           output_format: cli
+
+      # --- INFRASTRUCTURE DEPLOYMENT START ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init and Apply
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'us-east-1'
+        run: |
+          cd cloud-infra
+          terraform init
+          terraform apply -auto-approve
+      # --- INFRASTRUCTURE DEPLOYMENT END ---
 
       # 2. DOCKER CONFIG SCAN (Trivy)
       - name: Scan Dockerfile for Misconfigurations
@@ -43,14 +58,12 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      # 5. DAST PREPARATION (Network and Start)
+      # 5. DAST PREPARATION
       - name: Start Container for DAST
         run: |
-          # Map host port 8080 to container port 5000
           docker run -d -p 8080:5000 --name test-container ehealth-app
           echo "Waiting for Flask app..."
           for i in {1..20}; do
-            # Check port 8080 as defined in the mapping above
             if curl -s http://localhost:8080; then
               echo "App is UP!"
               exit 0
@@ -64,7 +77,6 @@ jobs:
       - name: Run OWASP ZAP Attack
         uses: zaproxy/action-baseline@v0.15.0
         with:
-          # Use localhost instead of host.docker.internal for GitHub Runners
           target: 'http://localhost:8080' 
           token: ${{ secrets.GITHUB_TOKEN }}
           fail_action: false 
@@ -83,4 +95,4 @@ jobs:
 
       - name: Final Status
         if: success()
-        run: echo "SAST, DAST, and IaC Scans passed. Infrastructure is fully compliant."
+        run: echo "SAST, DAST, and IaC Scans passed. Infrastructure is fully deployed and compliant."
