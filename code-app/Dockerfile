@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools \
 
 # Runtime stage
 # FIX CKV_DOCKER_7: Use a specific digest/tag instead of just 'latest'
-FROM gcr.io/distroless/python3-debian12:latest
+FROM cgr.dev/chainguard/python:latest
 WORKDIR /app
 
 COPY --from=builder /install /usr/local
